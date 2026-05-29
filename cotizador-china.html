@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cotizador Import China</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131c;
+    --surface2: #1c1c2a;
+    --border: #2a2a3d;
+    --accent: #ff6b35;
+    --accent2: #ffd700;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --green: #00e5a0;
+    --red: #ff4466;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(255,107,53,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 10% 80%, rgba(0,229,160,0.05) 0%, transparent 60%);
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .header .tag {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 6vw, 48px);
+    font-weight: 800;
+    line-height: 1;
+    color: #fff;
+  }
+  .header h1 span { color: var(--accent); }
+  .header p {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .field {
+    margin-bottom: 14px;
+  }
+  label {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  input[type="number"], input[type="text"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 16px;
+    padding: 11px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  input:focus { border-color: var(--accent); }
+  input::placeholder { color: var(--muted); opacity: 0.5; }
+
+  .prefix-input {
+    position: relative;
+  }
+  .prefix-input span {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 14px;
+    pointer-events: none;
+  }
+  .prefix-input input { padding-left: 36px; }
+
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* Calc steps */
+  .steps {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  .step-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed rgba(255,255,255,0.05);
+    font-size: 12px;
+  }
+  .step-row:last-child { border-bottom: none; }
+  .step-label { color: var(--muted); }
+  .step-value { color: var(--text); font-weight: 500; }
+  .step-value.accent { color: var(--accent2); }
+  .step-value.green { color: var(--green); }
+
+  /* Big result */
+  .result-card {
+    background: linear-gradient(135deg, #1c1c2a, #13131c);
+    border: 1px solid var(--accent);
+    border-radius: 16px;
+    padding: 24px 20px;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(255,107,53,0.1);
+  }
+  .result-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .result-value {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 10vw, 56px);
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .result-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* Margin section */
+  .margin-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .margin-row input { flex: 1; }
+  .margin-pct {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent2);
+    min-width: 50px;
+    text-align: right;
+  }
+
+  .final-prices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .price-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .price-box .pb-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .price-box .pb-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .price-box.highlight {
+    border-color: var(--green);
+    background: rgba(0,229,160,0.05);
+  }
+  .price-box.highlight .pb-val { color: var(--green); }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+
+  .exchange-live {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: rgba(255,215,0,0.07);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 8px;
+    margin-bottom: 14px;
+    font-size: 11px;
+    color: var(--accent2);
+  }
+  .dot-live {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .note {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  .reset-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    margin-top: 8px;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .rmb-rate-info {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button { -webkit-appearance: none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="tag">🇨🇳 → 🇲🇽</div>
+  <h1>COTI<span>ZADOR</span></h1>
+  <p>Importación directa desde China · Costo real en MXN</p>
+</div>
+
+<!-- TASAS DE CAMBIO -->
+<div class="card">
+  <div class="card-title">💱 Tasas de cambio</div>
+
+  <div class="exchange-live">
+    <div class="dot-live"></div>
+    Tipo de cambio referencia: ~$17.29 MXN/USD (hoy 28 mayo 2026)
+  </div>
+
+  <div class="row-2">
+    <div class="field">
+      <label>USD → MXN</label>
+      <div class="prefix-input">
+        <span>$</span>
+        <input type="number" id="usdMxn" value="17.29" step="0.01" min="1">
+      </div>
+    </div>
+    <div class="field">
+      <label>RMB → USD</label>
+      <div class="prefix-input">
+        <span>¥</span>
+        <input type="number" id="rmbUsd" value="7.25" step="0.01" min="1">
+      </div>
+      <div class="rmb-rate-info">~7.25 RMB por USD (ref.)</div>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCTO -->
+<div class="card">
+  <div class="card-title">📦 Producto</div>
+
+  <div class="field">
+    <label>Nombre del producto</label>
+    <input type="text" id="nombre" placeholder="Ej: Camiseta manga corta">
+  </div>
+
+  <div class="row-2">
+    <div class="field">
+      <label>Precio en RMB (¥)</label>
+      <div class="prefix-input">
+        <span>¥</span>
+        <input type="number" id="precioRmb" placeholder="90" step="0.01" min="0">
+      </div>
+    </div>
+    <div class="field">
+      <label>Peso real del producto (g)</label>
+      <input type="number" id="pesoGramos" placeholder="300" step="1" min="0">
+    </div>
+  </div>
+</div>
+
+<!-- COSTOS CHINA -->
+<div class="card">
+  <div class="card-title">🏭 Costos agente / envío China</div>
+
+  <div class="row-2">
+    <div class="field">
+      <label>Comisión agente (%)</label>
+      <input type="number" id="comisionAgente" value="10" step="0.5" min="0">
+    </div>
+    <div class="field">
+      <label>Envío agente → bodega (USD)</label>
+      <div class="prefix-input">
+        <span>$</span>
+        <input type="number" id="envioAgente" value="1" step="0.10" min="0">
+      </div>
+    </div>
+  </div>
+  <p class="note">La comisión se aplica sobre el precio RMB. El envío se suma antes de convertir.</p>
+</div>
+
+<!-- FLETE INTERNACIONAL -->
+<div class="card">
+  <div class="card-title">✈️ Flete internacional</div>
+
+  <div class="row-2">
+    <div class="field">
+      <label>Costo por kg (USD)</label>
+      <div class="prefix-input">
+        <span>$</span>
+        <input type="number" id="costoPorKg" value="16.5" step="0.5" min="0">
+      </div>
+    </div>
+    <div class="field">
+      <label>Factor empaque</label>
+      <input type="number" id="factorEmpaque" value="1.16" step="0.01" min="1">
+    </div>
+  </div>
+  <p class="note">Factor empaque: por cada 1 kg físico, pagas 1.16 kg (empaque incluido).</p>
+</div>
+
+<!-- DESGLOSE AUTOMÁTICO -->
+<div class="card" id="calcCard" style="display:none">
+  <div class="card-title">🧮 Desglose de costos</div>
+
+  <div class="steps" id="stepsBox"></div>
+
+  <div class="result-card">
+    <div class="result-label">Costo total en México (sin margen)</div>
+    <div class="result-value" id="costoTotal">$—</div>
+    <div class="result-sub" id="costoTotalUsd"></div>
+  </div>
+</div>
+
+<!-- PRECIO DE VENTA -->
+<div class="card" id="ventaCard" style="display:none">
+  <div class="card-title">🏷️ Precio de venta</div>
+
+  <div class="field">
+    <label>Margen de ganancia (%)</label>
+    <div class="margin-row">
+      <input type="range" id="margenRange" min="0" max="200" value="50" style="flex:1; accent-color: var(--accent); background:transparent; cursor:pointer;">
+      <div class="margin-pct" id="margenPct">50%</div>
+    </div>
+    <div class="field" style="margin-top:6px; margin-bottom:0">
+      <input type="number" id="margenNum" value="50" placeholder="50" min="0" style="text-align:center;">
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="final-prices">
+    <div class="price-box">
+      <div class="pb-label">Precio venta MXN</div>
+      <div class="pb-val" id="precioVentaMxn" style="color:var(--accent2);">—</div>
+    </div>
+    <div class="price-box highlight">
+      <div class="pb-label">Ganancia por pieza</div>
+      <div class="pb-val" id="gananciaMxn">—</div>
+    </div>
+    <div class="price-box">
+      <div class="pb-label">Precio venta USD</div>
+      <div class="pb-val" id="precioVentaUsd" style="color:var(--muted);">—</div>
+    </div>
+    <div class="price-box">
+      <div class="pb-label">Margen sobre venta</div>
+      <div class="pb-val" id="margenReal" style="color:var(--muted);">—</div>
+    </div>
+  </div>
+</div>
+
+<button class="reset-btn" onclick="resetForm()">↺ Limpiar campos</button>
+
+<script>
+  const ids = ['precioRmb','pesoGramos','usdMxn','rmbUsd','comisionAgente','envioAgente','costoPorKg','factorEmpaque','margenNum'];
+
+  function calcular() {
+    const precioRmb     = parseFloat(document.getElementById('precioRmb').value) || 0;
+    const pesoGramos    = parseFloat(document.getElementById('pesoGramos').value) || 0;
+    const usdMxn        = parseFloat(document.getElementById('usdMxn').value) || 17.29;
+    const rmbUsd        = parseFloat(document.getElementById('rmbUsd').value) || 7.25;
+    const comisionPct   = parseFloat(document.getElementById('comisionAgente').value) || 0;
+    const envioAgente   = parseFloat(document.getElementById('envioAgente').value) || 0;
+    const costoPorKg    = parseFloat(document.getElementById('costoPorKg').value) || 0;
+    const factorEmpaque = parseFloat(document.getElementById('factorEmpaque').value) || 1;
+    const margen        = parseFloat(document.getElementById('margenNum').value) || 0;
+
+    if (!precioRmb || !pesoGramos) {
+      document.getElementById('calcCard').style.display = 'none';
+      document.getElementById('ventaCard').style.display = 'none';
+      return;
+    }
+
+    // 1. Costo China en RMB
+    const comisionRmb = precioRmb * (comisionPct / 100);
+    const costoEnChina_RMB = precioRmb + comisionRmb;
+
+    // 2. Convertir a USD + envío agente
+    const costoEnChina_USD = (costoEnChina_RMB / rmbUsd) + envioAgente;
+
+    // 3. Flete por peso volumétrico
+    const pesoKg = pesoGramos / 1000;
+    const pesoFacturado = pesoKg * factorEmpaque;
+    const fleteUSD = pesoFacturado * costoPorKg;
+
+    // 4. Costo total USD
+    const totalUSD = costoEnChina_USD + fleteUSD;
+
+    // 5. Convertir a MXN
+    const totalMXN = totalUSD * usdMxn;
+
+    // Render steps
+    const steps = [
+      { label: `Precio base (¥${precioRmb.toFixed(2)} RMB)`, value: `¥${precioRmb.toFixed(2)}`, sub: true },
+      { label: `+ Comisión agente ${comisionPct}% (¥${comisionRmb.toFixed(2)})`, value: `¥${costoEnChina_RMB.toFixed(2)}` },
+      { label: `= Costo China en USD`, value: `$${(costoEnChina_RMB / rmbUsd).toFixed(3)} USD`, accent: true },
+      { label: `+ Envío agente → bodega`, value: `$${envioAgente.toFixed(2)} USD` },
+      { label: `= Total en China`, value: `$${costoEnChina_USD.toFixed(3)} USD`, accent: true },
+      { label: `Peso real: ${pesoGramos}g → ${pesoKg.toFixed(3)} kg`, value: '' },
+      { label: `Peso facturado (×${factorEmpaque})`, value: `${pesoFacturado.toFixed(3)} kg` },
+      { label: `+ Flete (${pesoFacturado.toFixed(3)} kg × $${costoPorKg})`, value: `$${fleteUSD.toFixed(2)} USD` },
+      { label: `= Costo total USD`, value: `$${totalUSD.toFixed(2)} USD`, accent: true },
+      { label: `× Tipo de cambio ($${usdMxn} MXN/USD)`, value: `$${totalMXN.toFixed(2)} MXN`, green: true },
+    ];
+
+    document.getElementById('stepsBox').innerHTML = steps.map(s => `
+      <div class="step-row">
+        <span class="step-label">${s.label}</span>
+        <span class="step-value ${s.accent ? 'accent' : ''} ${s.green ? 'green' : ''}">${s.value}</span>
+      </div>
+    `).join('');
+
+    document.getElementById('costoTotal').textContent = `$${totalMXN.toFixed(2)}`;
+    document.getElementById('costoTotalUsd').textContent = `USD $${totalUSD.toFixed(2)}`;
+
+    document.getElementById('calcCard').style.display = 'block';
+    document.getElementById('ventaCard').style.display = 'block';
+
+    // Margen
+    const precioVenta = totalMXN * (1 + margen / 100);
+    const ganancia = precioVenta - totalMXN;
+    const margenSobreVenta = (ganancia / precioVenta) * 100;
+
+    document.getElementById('precioVentaMxn').textContent = `$${precioVenta.toFixed(2)}`;
+    document.getElementById('gananciaMxn').textContent = `$${ganancia.toFixed(2)}`;
+    document.getElementById('precioVentaUsd').textContent = `$${(precioVenta / usdMxn).toFixed(2)}`;
+    document.getElementById('margenReal').textContent = `${margenSobreVenta.toFixed(1)}%`;
+  }
+
+  // Sync range ↔ number
+  document.getElementById('margenRange').addEventListener('input', function() {
+    document.getElementById('margenNum').value = this.value;
+    document.getElementById('margenPct').textContent = this.value + '%';
+    calcular();
+  });
+  document.getElementById('margenNum').addEventListener('input', function() {
+    const v = Math.min(Math.max(parseFloat(this.value) || 0, 0), 200);
+    document.getElementById('margenRange').value = v;
+    document.getElementById('margenPct').textContent = v + '%';
+    calcular();
+  });
+
+  ids.filter(i => i !== 'margenNum').forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', calcular);
+  });
+
+  function resetForm() {
+    document.getElementById('nombre').value = '';
+    document.getElementById('precioRmb').value = '';
+    document.getElementById('pesoGramos').value = '';
+    document.getElementById('margenNum').value = '50';
+    document.getElementById('margenRange').value = '50';
+    document.getElementById('margenPct').textContent = '50%';
+    document.getElementById('calcCard').style.display = 'none';
+    document.getElementById('ventaCard').style.display = 'none';
+  }
+</script>
+</body>
+</html>
